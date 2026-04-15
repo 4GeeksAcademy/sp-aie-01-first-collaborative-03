@@ -135,8 +135,8 @@
       </section>
 
       <section class="mt-10 grid gap-8 lg:grid-cols-[2fr_1fr]">
-        <div class="reveal delay-1 space-y-4">
-          <article class="rounded-2xl border border-ink/10 bg-white/80 p-4 shadow-soft sm:p-5">
+        <div id="cart-items" class="reveal delay-1 space-y-4">
+          <article class="rounded-2xl border border-ink/10 bg-white/80 p-4 shadow-soft sm:p-5" data-unit-price="289" data-quantity="1">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div class="flex items-center gap-4">
                 <img
@@ -152,12 +152,15 @@
               </div>
               <div class="flex items-center gap-6 text-sm sm:text-base">
                 <p><span class="font-medium">Cantidad:</span> 1</p>
-                <p><span class="font-medium">Total:</span> EUR 289</p>
+                <p><span class="font-medium">Total:</span> <span class="item-total">EUR 289</span></p>
+                <button type="button" class="remove-product rounded-full border border-ink px-4 py-2 text-xs font-semibold transition hover:bg-ink hover:text-cream">
+                  Eliminar
+                </button>
               </div>
             </div>
           </article>
 
-          <article class="rounded-2xl border border-ink/10 bg-white/80 p-4 shadow-soft sm:p-5">
+          <article class="rounded-2xl border border-ink/10 bg-white/80 p-4 shadow-soft sm:p-5" data-unit-price="249" data-quantity="2">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div class="flex items-center gap-4">
                 <img
@@ -173,12 +176,15 @@
               </div>
               <div class="flex items-center gap-6 text-sm sm:text-base">
                 <p><span class="font-medium">Cantidad:</span> 2</p>
-                <p><span class="font-medium">Total:</span> EUR 498</p>
+                <p><span class="font-medium">Total:</span> <span class="item-total">EUR 498</span></p>
+                <button type="button" class="remove-product rounded-full border border-ink px-4 py-2 text-xs font-semibold transition hover:bg-ink hover:text-cream">
+                  Eliminar
+                </button>
               </div>
             </div>
           </article>
 
-          <article class="rounded-2xl border border-ink/10 bg-white/80 p-4 shadow-soft sm:p-5">
+          <article class="rounded-2xl border border-ink/10 bg-white/80 p-4 shadow-soft sm:p-5" data-unit-price="179" data-quantity="1">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div class="flex items-center gap-4">
                 <img
@@ -194,7 +200,10 @@
               </div>
               <div class="flex items-center gap-6 text-sm sm:text-base">
                 <p><span class="font-medium">Cantidad:</span> 1</p>
-                <p><span class="font-medium">Total:</span> EUR 179</p>
+                <p><span class="font-medium">Total:</span> <span class="item-total">EUR 179</span></p>
+                <button type="button" class="remove-product rounded-full border border-ink px-4 py-2 text-xs font-semibold transition hover:bg-ink hover:text-cream">
+                  Eliminar
+                </button>
               </div>
             </div>
           </article>
@@ -205,18 +214,32 @@
           <div class="mt-6 space-y-4 text-sm sm:text-base">
             <div class="flex items-center justify-between border-b border-ink/10 pb-3">
               <span class="text-ink/75">Subtotal</span>
-              <span class="font-semibold">EUR 966</span>
+              <span id="subtotal" class="font-semibold">EUR 966</span>
             </div>
             <div class="flex items-center justify-between border-b border-ink/10 pb-3">
               <span class="text-ink/75">Impuestos (21%)</span>
-              <span class="font-semibold">EUR 202.86</span>
+              <span id="taxes" class="font-semibold">EUR 202.86</span>
             </div>
             <div class="flex items-center justify-between pt-1 text-lg">
               <span class="font-semibold">Total</span>
-              <span class="font-semibold text-rouge">EUR 1168.86</span>
+              <span id="total" class="font-semibold text-rouge">EUR 1168.86</span>
             </div>
           </div>
+          <div id="undo-box" class="mt-5 hidden rounded-xl border border-rouge/20 bg-rouge/10 p-3 text-sm">
+            <p id="undo-label" class="text-ink/80"></p>
+            <button
+              id="undo-button"
+              type="button"
+              class="mt-2 rounded-full border border-ink px-4 py-2 text-xs font-semibold transition hover:bg-ink hover:text-cream"
+            >
+              Deshacer producto
+            </button>
+          </div>
+          <p id="empty-cart" class="mt-5 hidden rounded-xl border border-ink/10 bg-fog/70 p-3 text-sm text-ink/75">
+            Tu carrito esta vacio. Añade productos para continuar con la compra.
+          </p>
           <button
+            id="buy-button"
             class="mt-8 w-full rounded-full bg-ink px-6 py-3 text-sm font-semibold text-cream transition hover:bg-rouge"
             type="button"
           >
@@ -236,5 +259,107 @@
         </nav>
       </div>
     </footer>
+
+    <script>
+      const TAX_RATE = 0.21;
+      const cartItemsContainer = document.getElementById("cart-items");
+      const subtotalElement = document.getElementById("subtotal");
+      const taxesElement = document.getElementById("taxes");
+      const totalElement = document.getElementById("total");
+      const undoBox = document.getElementById("undo-box");
+      const undoLabel = document.getElementById("undo-label");
+      const undoButton = document.getElementById("undo-button");
+      const emptyCartNotice = document.getElementById("empty-cart");
+      const buyButton = document.getElementById("buy-button");
+
+      let lastRemovedProduct = null;
+
+      function formatCurrency(amount) {
+        return new Intl.NumberFormat("es-ES", {
+          style: "currency",
+          currency: "EUR",
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(amount);
+      }
+
+      function getProductTotal(productCard) {
+        const unitPrice = Number(productCard.dataset.unitPrice || 0);
+        const quantity = Number(productCard.dataset.quantity || 0);
+        return unitPrice * quantity;
+      }
+
+      function updateCartTotals() {
+        const products = Array.from(cartItemsContainer.querySelectorAll("article"));
+        const subtotal = products.reduce((sum, product) => {
+          const productTotal = getProductTotal(product);
+          const totalEl = product.querySelector(".item-total");
+
+          if (totalEl) {
+            totalEl.textContent = formatCurrency(productTotal);
+          }
+
+          return sum + productTotal;
+        }, 0);
+
+        const taxes = subtotal * TAX_RATE;
+        const total = subtotal + taxes;
+
+        subtotalElement.textContent = formatCurrency(subtotal);
+        taxesElement.textContent = formatCurrency(taxes);
+        totalElement.textContent = formatCurrency(total);
+
+        const hasProducts = products.length > 0;
+        emptyCartNotice.classList.toggle("hidden", hasProducts);
+        buyButton.disabled = !hasProducts;
+        buyButton.classList.toggle("opacity-50", !hasProducts);
+        buyButton.classList.toggle("cursor-not-allowed", !hasProducts);
+      }
+
+      function attachRemoveHandler(button) {
+        button.addEventListener("click", () => {
+          const productCard = button.closest("article");
+
+          if (!productCard) {
+            return;
+          }
+
+          const productName = productCard.querySelector("h2")?.textContent || "Producto";
+          const nextSibling = productCard.nextElementSibling;
+
+          lastRemovedProduct = {
+            element: productCard,
+            nextSibling
+          };
+
+          productCard.remove();
+          undoLabel.textContent = `${productName} eliminado del carrito.`;
+          undoBox.classList.remove("hidden");
+          updateCartTotals();
+        });
+      }
+
+      cartItemsContainer.querySelectorAll(".remove-product").forEach(attachRemoveHandler);
+
+      undoButton.addEventListener("click", () => {
+        if (!lastRemovedProduct) {
+          return;
+        }
+
+        const { element, nextSibling } = lastRemovedProduct;
+
+        if (nextSibling && nextSibling.parentNode === cartItemsContainer) {
+          cartItemsContainer.insertBefore(element, nextSibling);
+        } else {
+          cartItemsContainer.appendChild(element);
+        }
+
+        lastRemovedProduct = null;
+        undoBox.classList.add("hidden");
+        updateCartTotals();
+      });
+
+      updateCartTotals();
+    </script>
   </body>
 </html>
