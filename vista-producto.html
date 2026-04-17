@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maison Lumiere | Vista de producto</title>
+    <meta
+      name="description"
+      content="Vista de producto de Maison Lumiere con imagen, detalles principales, selector de cantidad y descripcion completa."
+    />
+    <meta
+      name="keywords"
+      content="vista de producto, ficha de producto, ecommerce moda, Maison Lumiere"
+    />
+    <meta name="author" content="Maison Lumiere" />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="Maison Lumiere | Vista de producto" />
+    <meta
+      property="og:description"
+      content="Ficha de producto con informacion de compra y descripcion detallada para ecommerce de moda."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:image" content="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1400&q=80" />
+    <link rel="canonical" href="https://www.maisonlumiere.com/producto/chaqueta-atelier-lumiere" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              cream: "#f6f1e8",
+              ink: "#1e1b18",
+              rouge: "#a13f3a",
+              gold: "#b88c4a",
+              fog: "#e8dfd2"
+            },
+            fontFamily: {
+              display: ["DM Serif Display", "serif"],
+              sans: ["Space Grotesk", "sans-serif"]
+            },
+            boxShadow: {
+              soft: "0 10px 30px rgba(30, 27, 24, 0.08)"
+            }
+          }
+        }
+      };
+    </script>
+
+    <style>
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        background:
+          radial-gradient(circle at 15% 10%, rgba(184, 140, 74, 0.15), transparent 36%),
+          radial-gradient(circle at 88% 12%, rgba(161, 63, 58, 0.14), transparent 30%),
+          linear-gradient(180deg, #fbf8f3 0%, #f6f1e8 100%);
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(14px);
+        animation: riseIn 0.8s ease forwards;
+      }
+
+      .reveal.delay-1 {
+        animation-delay: 0.15s;
+      }
+
+      .reveal.delay-2 {
+        animation-delay: 0.3s;
+      }
+
+      @keyframes riseIn {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "OnlineStore",
+        "name": "Maison Lumiere",
+        "url": "https://www.maisonlumiere.com/",
+        "description": "Marca de moda francesa contemporanea con tienda online de ropa premium.",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "FR",
+          "addressLocality": "Paris"
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://www.maisonlumiere.com/?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+  </head>
+
+  <body class="font-sans text-ink">
+    <a
+      href="#contenido-principal"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-ink focus:px-4 focus:py-2 focus:text-cream"
+    >
+      Saltar al contenido principal
+    </a>
+
+    <header class="border-b border-ink/10 bg-cream/80 backdrop-blur">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <div>
+          <p class="font-display text-2xl leading-none">Maison Lumiere</p>
+          <p class="text-xs tracking-[0.2em] text-ink/70 uppercase">Ficha de producto</p>
+        </div>
+        <a href="index.html" class="rounded-full border border-ink px-4 py-2 text-sm font-semibold transition hover:bg-ink hover:text-cream">
+          Volver a tienda
+        </a>
+      </div>
+    </header>
+
+    <main id="contenido-principal" class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+      <section class="reveal overflow-hidden rounded-3xl border border-ink/10 bg-white/80 shadow-soft">
+        <div class="grid md:grid-cols-2">
+          <div class="md:h-full">
+            <img
+              src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1400&q=80"
+              alt="Chaqueta Atelier Lumiere en tono camel"
+              class="h-full min-h-[340px] w-full object-cover"
+              loading="lazy"
+            />
+          </div>
+
+          <div class="reveal delay-1 p-6 sm:p-8 lg:p-10">
+            <p class="text-xs font-semibold tracking-[0.22em] text-rouge uppercase">Novedad atelier</p>
+            <h1 class="mt-3 font-display text-4xl leading-tight sm:text-5xl">Chaqueta Atelier Lumiere</h1>
+
+            <dl class="mt-8 space-y-4 text-sm sm:text-base">
+              <div class="flex items-center justify-between border-b border-ink/10 pb-3">
+                <dt class="font-medium text-ink/70">Codigo / referencia</dt>
+                <dd class="font-semibold">ML-CH-2048</dd>
+              </div>
+              <div class="flex items-center justify-between border-b border-ink/10 pb-3">
+                <dt class="font-medium text-ink/70">Talla</dt>
+                <dd class="font-semibold">M</dd>
+              </div>
+              <div class="flex items-center justify-between border-b border-ink/10 pb-3">
+                <dt class="font-medium text-ink/70">Precio</dt>
+                <dd class="text-xl font-bold text-rouge">EUR 189</dd>
+              </div>
+            </dl>
+
+            <div class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-end">
+              <div class="sm:w-36">
+                <label for="cantidad" class="mb-2 block text-sm font-medium">Cantidad</label>
+                <input
+                  id="cantidad"
+                  name="cantidad"
+                  type="number"
+                  min="1"
+                  value="1"
+                  class="w-full rounded-xl border border-ink/20 bg-cream px-4 py-3 text-base font-semibold outline-none ring-0 transition focus:border-ink"
+                />
+              </div>
+              <button
+                type="button"
+                class="rounded-xl bg-ink px-6 py-3 text-sm font-semibold text-cream transition hover:bg-rouge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+              >
+                Agregar al carrito
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="reveal delay-2 mt-10 rounded-3xl border border-ink/10 bg-white/70 p-6 shadow-soft sm:p-8">
+        <h2 class="font-display text-3xl sm:text-4xl">Descripcion detallada</h2>
+
+        <div class="mt-6 grid gap-6 md:grid-cols-2">
+          <article class="rounded-2xl bg-cream/80 p-5">
+            <h3 class="text-lg font-semibold">Materiales</h3>
+            <p class="mt-3 text-sm leading-relaxed text-ink/80 sm:text-base">
+              Exterior en mezcla premium de lana y algodon, con forro interior transpirable de viscosa. Botones reforzados y
+              costuras dobles para mayor durabilidad en uso diario.
+            </p>
+          </article>
+
+          <article class="rounded-2xl bg-cream/80 p-5">
+            <h3 class="text-lg font-semibold">Uso recomendado</h3>
+            <p class="mt-3 text-sm leading-relaxed text-ink/80 sm:text-base">
+              Ideal para oficina, reuniones profesionales, cenas urbanas y viajes de fin de semana. Combina con pantalones de
+              sastreria o denim para una silueta elegante y versatil.
+            </p>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
