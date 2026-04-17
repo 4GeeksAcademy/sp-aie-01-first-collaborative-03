@@ -156,14 +156,21 @@
           <p class="text-xs tracking-[0.2em] text-ink/70 uppercase">Paris</p>
         </div>
 
-        <nav aria-label="Navegacion de utilidad" class="flex items-center gap-3">
-          <a
-            href="index.html"
-            class="rounded-full border border-ink px-4 py-2 text-sm font-semibold transition hover:bg-ink hover:text-cream"
-          >
-            Volver a tienda
-          </a>
+        <nav aria-label="Navegacion principal">
+          <ul class="hidden items-center gap-7 text-sm font-medium md:flex">
+            <li><a class="transition hover:text-rouge" href="index.html">Inicio</a></li>
+            <li><a class="transition hover:text-rouge" href="catalogo.html">Catalogo</a></li>
+            <li><a class="text-rouge" aria-current="page" href="checkout.html">Checkout</a></li>
+          </ul>
         </nav>
+
+        <a
+          id="boton-cesta-checkout"
+          href="checkout.html"
+          class="rounded-full border border-ink px-4 py-2 text-sm font-semibold transition hover:bg-ink hover:text-cream"
+        >
+          Cesta (0)
+        </a>
       </div>
     </header>
 
@@ -415,52 +422,31 @@
           <section class="rounded-3xl border border-ink/10 bg-white/85 p-5 shadow-soft sm:p-6">
             <h2 class="font-display text-3xl">Resumen</h2>
 
-            <div class="mt-5 space-y-4 border-b border-ink/10 pb-5">
-              <article class="flex items-center gap-3">
-                <img
-                  src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=320&q=80"
-                  alt="Abrigo Marais color camel"
-                  class="h-16 w-16 rounded-xl object-cover"
-                  loading="lazy"
-                />
-                <div>
-                  <h3 class="font-semibold">Abrigo Marais</h3>
-                  <p class="text-sm text-ink/70">Talla M · Cantidad 1</p>
-                </div>
-                <p class="ml-auto text-sm font-semibold">EUR 289</p>
-              </article>
-
-              <article class="flex items-center gap-3">
-                <img
-                  src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?auto=format&fit=crop&w=320&q=80"
-                  alt="Set Palais color marfil"
-                  class="h-16 w-16 rounded-xl object-cover"
-                  loading="lazy"
-                />
-                <div>
-                  <h3 class="font-semibold">Set Palais</h3>
-                  <p class="text-sm text-ink/70">Talla S · Cantidad 1</p>
-                </div>
-                <p class="ml-auto text-sm font-semibold">EUR 249</p>
-              </article>
-            </div>
+            <div id="resumen-items" class="mt-5 space-y-4 border-b border-ink/10 pb-5"></div>
+            <button
+              id="vaciar-carrito"
+              type="button"
+              class="mt-4 rounded-full border border-ink px-4 py-2 text-sm font-semibold transition hover:bg-ink hover:text-cream"
+            >
+              Vaciar carrito
+            </button>
 
             <dl class="mt-5 space-y-2 text-sm">
               <div class="flex justify-between">
                 <dt class="text-ink/70">Subtotal</dt>
-                <dd>EUR 538</dd>
+                <dd id="resumen-subtotal">EUR 0</dd>
               </div>
               <div class="flex justify-between">
                 <dt class="text-ink/70">Envio</dt>
-                <dd>EUR 12</dd>
+                <dd id="resumen-envio">EUR 0</dd>
               </div>
               <div class="flex justify-between">
                 <dt class="text-ink/70">Impuestos</dt>
-                <dd>EUR 44</dd>
+                <dd id="resumen-impuestos">EUR 0</dd>
               </div>
               <div class="flex justify-between border-t border-ink/10 pt-2 text-base font-semibold">
                 <dt>Total</dt>
-                <dd>EUR 594</dd>
+                <dd id="resumen-total">EUR 0</dd>
               </div>
             </dl>
 
@@ -486,6 +472,7 @@
 
     <script>
       (function () {
+        const CART_KEY = "ml_cart";
         const form = document.getElementById("checkout-form");
         const steps = Array.from(form.querySelectorAll("fieldset[data-step]"));
         const prevButton = document.getElementById("btn-prev");
@@ -501,8 +488,131 @@
 
         const cardNumberInput = document.getElementById("numeroTarjeta");
         const expiryInput = document.getElementById("vencimiento");
+        const summaryItems = document.getElementById("resumen-items");
+        const summarySubtotal = document.getElementById("resumen-subtotal");
+        const summaryShipping = document.getElementById("resumen-envio");
+        const summaryTaxes = document.getElementById("resumen-impuestos");
+        const summaryTotal = document.getElementById("resumen-total");
+        const clearCartButton = document.getElementById("vaciar-carrito");
+        const cartButton = document.getElementById("boton-cesta-checkout");
 
         let currentStep = 1;
+
+        function formatEUR(value) {
+          return "EUR " + Number(value || 0);
+        }
+
+        function readCart() {
+          try {
+            const raw = localStorage.getItem(CART_KEY);
+            const cart = raw ? JSON.parse(raw) : [];
+            return Array.isArray(cart) ? cart : [];
+          } catch (_) {
+            return [];
+          }
+        }
+
+        function saveCart(cart) {
+          localStorage.setItem(CART_KEY, JSON.stringify(cart));
+        }
+
+        function updateHeaderCartCount() {
+          const count = readCart().reduce((acc, item) => acc + (Number(item.quantity) || 0), 0);
+          cartButton.textContent = `Cesta (${count})`;
+        }
+
+        function decreaseItem(itemId, itemSize) {
+          const cart = readCart();
+          const itemIndex = cart.findIndex((item) => item.id === itemId && (item.size || "U") === itemSize);
+          if (itemIndex < 0) return;
+
+          const currentQty = Number(cart[itemIndex].quantity) || 1;
+          if (currentQty <= 1) {
+            cart.splice(itemIndex, 1);
+          } else {
+            cart[itemIndex].quantity = currentQty - 1;
+          }
+
+          saveCart(cart);
+          renderSummary();
+        }
+
+        function removeItem(itemId, itemSize) {
+          const cart = readCart().filter((item) => !(item.id === itemId && (item.size || "U") === itemSize));
+          saveCart(cart);
+          renderSummary();
+        }
+
+        function renderSummary() {
+          const cart = readCart();
+          if (cart.length === 0) {
+            summaryItems.innerHTML =
+              '<div class="space-y-3"><p class="text-sm text-ink/70">Tu carrito esta vacio. Agrega productos desde el catalogo para continuar.</p><a href="catalogo.html" class="inline-flex rounded-full border border-ink px-4 py-2 text-sm font-semibold transition hover:bg-ink hover:text-cream">Volver al catalogo</a></div>';
+            summarySubtotal.textContent = formatEUR(0);
+            summaryShipping.textContent = formatEUR(0);
+            summaryTaxes.textContent = formatEUR(0);
+            summaryTotal.textContent = formatEUR(0);
+            nextButton.disabled = true;
+            submitButton.disabled = true;
+            clearCartButton.disabled = true;
+            updateHeaderCartCount();
+            return;
+          }
+
+          const subtotal = cart.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.quantity) || 0), 0);
+          const shipping = subtotal >= 250 ? 0 : 12;
+          const taxes = Math.round(subtotal * 0.082);
+          const total = subtotal + shipping + taxes;
+
+          summaryItems.innerHTML = cart
+            .map(
+              (item) => `
+                <article class="flex items-center gap-3">
+                  <img
+                    src="${item.image || "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=320&q=80"}"
+                    alt="${item.imageAlt || item.name || "Producto Maison Lumiere"}"
+                    class="h-16 w-16 rounded-xl object-cover"
+                    loading="lazy"
+                  />
+                  <div>
+                    <h3 class="font-semibold">${item.name || "Producto"}</h3>
+                    <p class="text-sm text-ink/70">Talla ${item.size || "U"} · Cantidad ${Number(item.quantity) || 1}</p>
+                    <div class="mt-2 flex gap-2">
+                      <button
+                        type="button"
+                        data-action="decrease"
+                        data-id="${item.id || ""}"
+                        data-size="${item.size || "U"}"
+                        class="rounded-full border border-ink/30 px-3 py-1 text-xs font-semibold transition hover:bg-ink hover:text-cream"
+                      >
+                        -1 unidad
+                      </button>
+                      <button
+                        type="button"
+                        data-action="remove"
+                        data-id="${item.id || ""}"
+                        data-size="${item.size || "U"}"
+                        class="rounded-full border border-ink/30 px-3 py-1 text-xs font-semibold transition hover:bg-ink hover:text-cream"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                  <p class="ml-auto text-sm font-semibold">${formatEUR((Number(item.price) || 0) * (Number(item.quantity) || 0))}</p>
+                </article>
+              `
+            )
+            .join("");
+
+          summarySubtotal.textContent = formatEUR(subtotal);
+          summaryShipping.textContent = formatEUR(shipping);
+          summaryTaxes.textContent = formatEUR(taxes);
+          summaryTotal.textContent = formatEUR(total);
+          nextButton.disabled = false;
+          submitButton.disabled = false;
+          clearCartButton.disabled = false;
+          updateHeaderCartCount();
+        }
 
         function getStepFields(step) {
           return steps[step - 1].querySelectorAll("input, select, textarea");
@@ -574,15 +684,37 @@
 
         form.addEventListener("submit", function (event) {
           event.preventDefault();
+          if (readCart().length === 0) return;
           if (!validateCurrentStep()) return;
 
           const orderId = randomOrderId();
+          localStorage.removeItem(CART_KEY);
           form.classList.add("hidden");
           successPanel.classList.remove("hidden");
           orderIdText.textContent = "Numero de pedido: " + orderId;
           successPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+          updateHeaderCartCount();
         });
 
+        summaryItems.addEventListener("click", function (event) {
+          const trigger = event.target.closest("button[data-action]");
+          if (!trigger) return;
+
+          const action = trigger.dataset.action;
+          const itemId = trigger.dataset.id || "";
+          const itemSize = trigger.dataset.size || "U";
+          if (!itemId) return;
+
+          if (action === "decrease") decreaseItem(itemId, itemSize);
+          if (action === "remove") removeItem(itemId, itemSize);
+        });
+
+        clearCartButton.addEventListener("click", function () {
+          localStorage.removeItem(CART_KEY);
+          renderSummary();
+        });
+
+        renderSummary();
         showStep(1);
       })();
     </script>
